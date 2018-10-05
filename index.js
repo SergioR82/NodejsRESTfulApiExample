@@ -18,6 +18,7 @@ var server = http.createServer(function(req,res){
 
 	// Get path from parsed url.
 	var path = parsedUrl.pathname;
+	
 	// Discard host and port from url path.
 	var trimmedPath = path.replace(/^\/+|\/+$/g,'');
 
@@ -32,16 +33,16 @@ var server = http.createServer(function(req,res){
 
 	// Get the payload, if any.
 	var decoder = new StringDecoder('utf-8');
-	var streambuffer = '';
+	var buffer = '';
 	
 	// While streams are received, they are stored on a variable.
 	req.on('data', function(data){
-		streambuffer += decoder.write(data);
+		buffer += decoder.write(data);
 	});
 
 	// When the server ends receiving the request body content as streams, we log the end of buffer.
 	req.on('end', function(){
-		streambuffer += decoder.end();
+		buffer += decoder.end();
 
 		// Choose the handler for this request.
 		var chosenHandler = typeof(router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
@@ -52,7 +53,7 @@ var server = http.createServer(function(req,res){
 			'queryStringObject' : queryStringObject,
 			'method' : method,
 			'headers' : headers,
-			'payload' : streambuffer
+			'payload' : buffer
 		};
 
 		// Route the request to the handler.
